@@ -1,0 +1,1641 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sams World - Ultimate Cricket 2026</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --deep-blue: #0a1628;
+            --gold: #ffd700;
+            --neon-blue: #00d4ff;
+            --neon-pink: #ff006e;
+            --dark-bg: #050a14;
+            --glass: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--dark-bg);
+            color: white;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        #gameContainer {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            background: linear-gradient(135deg, #0a1628 0%, #1a2a4a 50%, #0a1628 100%);
+        }
+
+        /* Screens */
+        .screen {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        /* Loading Screen */
+        #loadingScreen {
+            background: radial-gradient(circle at center, #1a2a4a 0%, #050a14 100%);
+            z-index: 1000;
+        }
+
+        .logo-container {
+            text-align: center;
+            animation: logoPulse 2s ease-in-out infinite;
+        }
+
+        .game-logo {
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, #ffd700 0%, #ff8c00 100%);
+            border-radius: 50%;
+            position: relative;
+            box-shadow: 0 0 60px rgba(255, 215, 0, 0.6), inset 0 0 30px rgba(255, 255, 255, 0.3);
+            margin: 0 auto 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 4px solid #fff;
+        }
+
+        .game-logo::before {
+            content: '🏏';
+            font-size: 80px;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+        }
+
+        .game-logo::after {
+            content: '';
+            position: absolute;
+            width: 120%;
+            height: 120%;
+            border: 3px solid transparent;
+            border-top-color: var(--neon-blue);
+            border-radius: 50%;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes logoPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 32px;
+            font-weight: 900;
+            background: linear-gradient(45deg, #ffd700, #ff8c00, #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin-bottom: 20px;
+        }
+
+        .loading-bar {
+            width: 300px;
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 20px auto;
+        }
+
+        .loading-progress {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--gold), var(--neon-blue));
+            transition: width 0.3s;
+            box-shadow: 0 0 10px var(--gold);
+        }
+
+        .tagline {
+            font-size: 14px;
+            color: var(--neon-blue);
+            letter-spacing: 2px;
+            margin-top: 30px;
+            opacity: 0.8;
+        }
+
+        /* Main Menu */
+        #mainMenu {
+            background: linear-gradient(135deg, rgba(10,22,40,0.95) 0%, rgba(26,42,74,0.9) 100%),
+                        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,215,0,0.1)" stroke-width="0.5"/></svg>');
+            background-size: cover, 100px 100px;
+        }
+
+        .menu-header {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.5), transparent);
+        }
+
+        .menu-logo {
+            font-size: 24px;
+            font-weight: 900;
+            background: linear-gradient(45deg, #ffd700, #ff8c00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .currency-display {
+            display: flex;
+            gap: 15px;
+        }
+
+        .currency {
+            background: rgba(255,255,255,0.1);
+            padding: 8px 15px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            border: 1px solid rgba(255,215,0,0.3);
+        }
+
+        .currency-icon {
+            font-size: 16px;
+        }
+
+        .menu-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin-top: 80px;
+        }
+
+        .play-now-btn {
+            width: 280px;
+            height: 70px;
+            background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+            border: none;
+            border-radius: 35px;
+            font-size: 24px;
+            font-weight: 900;
+            color: #0a1628;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.4), inset 0 2px 10px rgba(255,255,255,0.3);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .play-now-btn::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+            transform: rotate(45deg);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
+
+        .play-now-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(255, 215, 0, 0.6);
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+            padding: 0 20px;
+        }
+
+        .menu-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 25px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .menu-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--gold), var(--neon-blue));
+            transform: scaleX(0);
+            transition: transform 0.3s;
+        }
+
+        .menu-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .menu-card:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateY(-5px);
+            border-color: rgba(255,215,0,0.3);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .menu-card-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .menu-card-title {
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--gold);
+        }
+
+        .menu-card-subtitle {
+            font-size: 11px;
+            color: rgba(255,255,255,0.6);
+            margin-top: 5px;
+        }
+
+        /* Game Screen */
+        #gameScreen {
+            background: linear-gradient(to bottom, #87CEEB 0%, #98D8E8 30%, #90EE90 30%, #228B22 100%);
+            position: relative;
+        }
+
+        .stadium-bg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(ellipse at 50% 120%, rgba(34,139,34,0.8) 0%, transparent 60%),
+                linear-gradient(to bottom, #1e3a5f 0%, #2c5f8e 40%, #87CEEB 40%, #98D8E8 100%);
+        }
+
+        .crowd-stands {
+            position: absolute;
+            bottom: 30%;
+            width: 100%;
+            height: 20%;
+            background: repeating-linear-gradient(
+                90deg,
+                #1a1a2e 0px,
+                #16213e 10px,
+                #1a1a2e 20px
+            );
+            opacity: 0.6;
+        }
+
+        .crowd-stands::before {
+            content: '👥👥👥👥👥👥👥👥👥👥👥👥👥👥👥👥👥👥👥👥';
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            font-size: 20px;
+            letter-spacing: -5px;
+            animation: crowdCheer 0.5s infinite alternate;
+        }
+
+        @keyframes crowdCheer {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-3px); }
+        }
+
+        .pitch {
+            position: absolute;
+            bottom: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 300px;
+            background: linear-gradient(to bottom, #d4a574 0%, #c19660 50%, #d4a574 100%);
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .pitch::before {
+            content: '';
+            position: absolute;
+            top: 10%;
+            left: 10%;
+            right: 10%;
+            bottom: 10%;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 5px;
+        }
+
+        .wickets {
+            position: absolute;
+            width: 30px;
+            height: 40px;
+            background: linear-gradient(to right, #8B4513, #A0522D);
+            border-radius: 3px;
+        }
+
+        .wickets.striker {
+            bottom: 15%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .wickets.non-striker {
+            bottom: 75%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .batsman {
+            position: absolute;
+            bottom: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 60px;
+            z-index: 10;
+            transition: all 0.3s;
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.3));
+        }
+
+        .batsman.swinging {
+            animation: batSwing 0.4s ease-out;
+        }
+
+        @keyframes batSwing {
+            0% { transform: translateX(-50%) rotate(0deg); }
+            50% { transform: translateX(-50%) rotate(-45deg) translateY(-20px); }
+            100% { transform: translateX(-50%) rotate(0deg); }
+        }
+
+        .bowler {
+            position: absolute;
+            bottom: 70%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 50px;
+            z-index: 10;
+            transition: all 0.5s;
+        }
+
+        .bowler.running {
+            animation: bowlRun 2s linear forwards;
+        }
+
+        @keyframes bowlRun {
+            0% { bottom: 70%; }
+            100% { bottom: 25%; }
+        }
+
+        .ball {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: radial-gradient(circle at 30% 30%, #ff0000, #8b0000);
+            border-radius: 50%;
+            z-index: 15;
+            display: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        .ball.bowled {
+            display: block;
+            animation: ballTravel 1s linear forwards;
+        }
+
+        @keyframes ballTravel {
+            0% { 
+                bottom: 25%; 
+                left: 50%; 
+                transform: translateX(-50%) scale(1);
+            }
+            100% { 
+                bottom: 22%; 
+                left: 50%; 
+                transform: translateX(-50%) scale(0.8);
+            }
+        }
+
+        .ball.hit {
+            animation: ballHit 1.5s ease-out forwards;
+        }
+
+        @keyframes ballHit {
+            0% { 
+                bottom: 22%; 
+                left: 50%; 
+                transform: translateX(-50%) scale(0.8);
+            }
+            100% { 
+                bottom: 80%; 
+                left: var(--hit-direction, 70%); 
+                transform: translateX(-50%) scale(0.5);
+                opacity: 0;
+            }
+        }
+
+        /* UI Overlay */
+        .game-ui {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .scoreboard {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(10, 22, 40, 0.9);
+            border: 2px solid var(--gold);
+            border-radius: 15px;
+            padding: 15px 25px;
+            display: flex;
+            gap: 30px;
+            align-items: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+        }
+
+        .team-score {
+            text-align: center;
+        }
+
+        .team-name {
+            font-size: 12px;
+            color: var(--neon-blue);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .score-main {
+            font-size: 28px;
+            font-weight: 900;
+            color: white;
+        }
+
+        .score-detail {
+            font-size: 11px;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .vs-divider {
+            font-size: 14px;
+            color: var(--gold);
+            font-weight: 700;
+        }
+
+        .match-info {
+            position: absolute;
+            top: 90px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.6);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: rgba(255,255,255,0.9);
+        }
+
+        .controls-area {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            padding: 0 20px;
+            pointer-events: auto;
+        }
+
+        .shot-timer {
+            width: 100%;
+            height: 6px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 3px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .timer-bar {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, #ff006e, #ffd700);
+            transition: width 0.1s linear;
+        }
+
+        .shot-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .shot-btn {
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            border: 2px solid rgba(255,215,0,0.3);
+            border-radius: 15px;
+            padding: 15px 10px;
+            color: white;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .shot-btn::before {
+            content: attr(data-icon);
+            display: block;
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .shot-btn:hover, .shot-btn:active {
+            background: linear-gradient(135deg, rgba(255,215,0,0.3), rgba(255,215,0,0.1));
+            border-color: var(--gold);
+            transform: translateY(-2px);
+        }
+
+        .shot-btn.perfect {
+            border-color: #00ff88;
+            box-shadow: 0 0 20px rgba(0,255,136,0.5);
+        }
+
+        .shot-btn.good {
+            border-color: #ffd700;
+            box-shadow: 0 0 15px rgba(255,215,0,0.4);
+        }
+
+        .shot-btn.miss {
+            border-color: #ff006e;
+            opacity: 0.7;
+        }
+
+        /* Commentary */
+        .commentary-box {
+            position: absolute;
+            bottom: 180px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+            border-left: 4px solid var(--gold);
+            max-width: 80%;
+            text-align: center;
+            animation: commentarySlide 0.3s ease-out;
+        }
+
+        @keyframes commentarySlide {
+            from { transform: translateX(-50%) translateY(20px); opacity: 0; }
+            to { transform: translateX(-50%) translateY(0); opacity: 1; }
+        }
+
+        /* Wagon Wheel Overlay */
+        .wagon-wheel {
+            position: absolute;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            width: 150px;
+            height: 150px;
+            background: rgba(0,0,0,0.7);
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.2);
+            display: none;
+        }
+
+        .wagon-wheel.active {
+            display: block;
+        }
+
+        /* Modal Screens */
+        .modal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            backdrop-filter: blur(10px);
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1a2a4a 0%, #0a1628 100%);
+            border: 2px solid var(--gold);
+            border-radius: 25px;
+            padding: 30px;
+            max-width: 90%;
+            width: 400px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--gold);
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+
+        .mode-grid {
+            display: grid;
+            gap: 15px;
+        }
+
+        .mode-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 15px;
+            padding: 20px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+        }
+
+        .mode-btn:hover {
+            background: rgba(255,215,0,0.1);
+            border-color: var(--gold);
+            transform: translateX(10px);
+        }
+
+        .mode-btn h3 {
+            font-size: 16px;
+            color: var(--neon-blue);
+            margin-bottom: 5px;
+        }
+
+        .mode-btn p {
+            font-size: 12px;
+            color: rgba(255,255,255,0.6);
+        }
+
+        /* Career Mode Styles */
+        .career-path {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding: 20px;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .career-stage {
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .career-stage.completed {
+            border-color: #00ff88;
+            background: rgba(0,255,136,0.1);
+        }
+
+        .career-stage.current {
+            border-color: var(--gold);
+            background: rgba(255,215,0,0.1);
+            animation: pulse 2s infinite;
+        }
+
+        .career-stage.locked {
+            opacity: 0.5;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(255,215,0,0.3); }
+            50% { box-shadow: 0 0 30px rgba(255,215,0,0.6); }
+        }
+
+        .stage-icon {
+            font-size: 40px;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 15px;
+        }
+
+        .stage-info h3 {
+            font-size: 18px;
+            color: white;
+            margin-bottom: 5px;
+        }
+
+        .stage-info p {
+            font-size: 12px;
+            color: rgba(255,255,255,0.6);
+        }
+
+        .stage-status {
+            position: absolute;
+            right: 20px;
+            font-size: 24px;
+        }
+
+        /* Celebration Effects */
+        .six-effect {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 80px;
+            animation: sixCelebration 2s ease-out forwards;
+            pointer-events: none;
+            z-index: 1000;
+            text-shadow: 0 0 30px var(--gold);
+        }
+
+        @keyframes sixCelebration {
+            0% { transform: translate(-50%, -50%) scale(0) rotate(0deg); opacity: 0; }
+            20% { transform: translate(-50%, -50%) scale(1.5) rotate(10deg); opacity: 1; }
+            40% { transform: translate(-50%, -50%) scale(1) rotate(-5deg); }
+            60% { transform: translate(-50%, -50%) scale(1.1) rotate(5deg); }
+            100% { transform: translate(-50%, -50%) scale(1) rotate(0deg) translateY(-100px); opacity: 0; }
+        }
+
+        .fireworks {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        .firework {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            animation: firework 1s ease-out forwards;
+        }
+
+        @keyframes firework {
+            0% { transform: translate(0, 0) scale(1); opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .menu-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .shot-buttons {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .scoreboard {
+                gap: 15px;
+                padding: 10px 15px;
+            }
+
+            .score-main {
+                font-size: 22px;
+            }
+        }
+
+        /* DRS Review Animation */
+        .drs-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 500;
+            flex-direction: column;
+        }
+
+        .drs-overlay.active {
+            display: flex;
+        }
+
+        .drs-screen {
+            background: #0a1628;
+            border: 3px solid var(--neon-blue);
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            min-width: 300px;
+        }
+
+        .drs-text {
+            font-size: 18px;
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        .drs-decision {
+            font-size: 48px;
+            font-weight: 900;
+            text-transform: uppercase;
+            animation: drsPulse 1s infinite;
+        }
+
+        .drs-decision.out {
+            color: #ff006e;
+        }
+
+        .drs-decision.not-out {
+            color: #00ff88;
+        }
+
+        @keyframes drsPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* Trophy Ceremony */
+        .trophy-ceremony {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(10,22,40,0.98), rgba(26,42,74,0.98));
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            flex-direction: column;
+        }
+
+        .trophy-ceremony.active {
+            display: flex;
+        }
+
+        .trophy {
+            font-size: 150px;
+            animation: trophyLift 3s ease-in-out infinite;
+            filter: drop-shadow(0 0 30px var(--gold));
+        }
+
+        @keyframes trophyLift {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+        }
+
+        .ceremony-text {
+            font-size: 36px;
+            font-weight: 900;
+            color: var(--gold);
+            margin-top: 30px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: var(--gold);
+            animation: confettiFall 3s linear forwards;
+        }
+
+        @keyframes confettiFall {
+            0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+    </style>
+<base target="_blank">
+</head>
+<body>
+    <div id="gameContainer">
+        <!-- Loading Screen -->
+        <div id="loadingScreen" class="screen active">
+            <div class="logo-container">
+                <div class="game-logo"></div>
+                <div class="loading-text">Sams World</div>
+                <div class="loading-bar">
+                    <div class="loading-progress" id="loadingProgress"></div>
+                </div>
+                <div class="tagline">This is not just cricket... This is Sams World.</div>
+            </div>
+        </div>
+
+        <!-- Main Menu -->
+        <div id="mainMenu" class="screen">
+            <div class="menu-header">
+                <div class="menu-logo">🏏 SAMS WORLD</div>
+                <div class="currency-display">
+                    <div class="currency">
+                        <span class="currency-icon">🪙</span>
+                        <span id="coins">5000</span>
+                    </div>
+                    <div class="currency">
+                        <span class="currency-icon">💎</span>
+                        <span id="gems">50</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="menu-content">
+                <button class="play-now-btn" onclick="showModeSelect()">PLAY NOW</button>
+
+                <div class="menu-grid">
+                    <div class="menu-card" onclick="showCareerMode()">
+                        <span class="menu-card-icon">🎭</span>
+                        <div class="menu-card-title">Career</div>
+                        <div class="menu-card-subtitle">Road to Glory</div>
+                    </div>
+                    <div class="menu-card" onclick="showWorldCup()">
+                        <span class="menu-card-icon">🏆</span>
+                        <div class="menu-card-title">World Cup</div>
+                        <div class="menu-card-subtitle">Tournament Mode</div>
+                    </div>
+                    <div class="menu-card" onclick="showMultiplayer()">
+                        <span class="menu-card-icon">🌍</span>
+                        <div class="menu-card-title">Multiplayer</div>
+                        <div class="menu-card-subtitle">PvP Battles</div>
+                    </div>
+                    <div class="menu-card" onclick="showPractice()">
+                        <span class="menu-card-icon">🎯</span>
+                        <div class="menu-card-title">Practice</div>
+                        <div class="menu-card-subtitle">Training Ground</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mode Selection Modal -->
+        <div id="modeSelectModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-title">Select Match Type</div>
+                <div class="mode-grid">
+                    <div class="mode-btn" onclick="startQuickMatch(2)">
+                        <h3>⚡ Super Over</h3>
+                        <p>1 over per side - Quick thrill</p>
+                    </div>
+                    <div class="mode-btn" onclick="startQuickMatch(5)">
+                        <h3>🔥 T5 Blast</h3>
+                        <p>5 overs - Fast paced action</p>
+                    </div>
+                    <div class="mode-btn" onclick="startQuickMatch(10)">
+                        <h3>⚡ T10 Showdown</h3>
+                        <p>10 overs - Balanced game</p>
+                    </div>
+                    <div class="mode-btn" onclick="startQuickMatch(20)">
+                        <h3>🏆 T20 World Cup</h3>
+                        <p>20 overs - Full experience</p>
+                    </div>
+                </div>
+                <button class="play-now-btn" style="margin-top: 20px; width: 200px; height: 50px; font-size: 16px;" onclick="closeModal()">BACK</button>
+            </div>
+        </div>
+
+        <!-- Career Mode Screen -->
+        <div id="careerScreen" class="screen">
+            <div class="menu-header">
+                <div class="menu-logo">🎭 CAREER MODE</div>
+                <button onclick="showMainMenu()" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 10px 20px; border-radius: 20px; cursor: pointer;">← Back</button>
+            </div>
+            <div class="career-path">
+                <div class="career-stage completed">
+                    <div class="stage-icon">🏘️</div>
+                    <div class="stage-info">
+                        <h3>Street Cricket</h3>
+                        <p>Mastered the basics</p>
+                    </div>
+                    <div class="stage-status">✅</div>
+                </div>
+                <div class="career-stage completed">
+                    <div class="stage-icon">🏏</div>
+                    <div class="stage-info">
+                        <h3>Domestic League</h3>
+                        <p>County Championship</p>
+                    </div>
+                    <div class="stage-status">✅</div>
+                </div>
+                <div class="career-stage current">
+                    <div class="stage-icon">⭐</div>
+                    <div class="stage-info">
+                        <h3>National Selection</h3>
+                        <p>Earn your cap</p>
+                    </div>
+                    <div class="stage-status">▶️</div>
+                </div>
+                <div class="career-stage locked">
+                    <div class="stage-icon">🌍</div>
+                    <div class="stage-info">
+                        <h3>World Cup Debut</h3>
+                        <p>Coming soon...</p>
+                    </div>
+                    <div class="stage-status">🔒</div>
+                </div>
+                <div class="career-stage locked">
+                    <div class="stage-icon">👑</div>
+                    <div class="stage-info">
+                        <h3>Captaincy</h3>
+                        <p>Lead your nation</p>
+                    </div>
+                    <div class="stage-status">🔒</div>
+                </div>
+                <div class="career-stage locked">
+                    <div class="stage-icon">🏆</div>
+                    <div class="stage-info">
+                        <h3>World Champion</h3>
+                        <p>Lift the trophy</p>
+                    </div>
+                    <div class="stage-status">🔒</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="gameScreen" class="screen">
+            <div class="stadium-bg">
+                <div class="crowd-stands"></div>
+                <div class="pitch">
+                    <div class="wickets striker"></div>
+                    <div class="wickets non-striker"></div>
+                </div>
+                <div class="batsman" id="batsman">🏏</div>
+                <div class="bowler" id="bowler">🤾</div>
+                <div class="ball" id="ball"></div>
+            </div>
+
+            <div class="game-ui">
+                <div class="scoreboard">
+                    <div class="team-score">
+                        <div class="team-name" id="battingTeam">IND</div>
+                        <div class="score-main"><span id="runs">0</span>/<span id="wickets">0</span></div>
+                        <div class="score-detail" id="overs">0.0 overs</div>
+                    </div>
+                    <div class="vs-divider">VS</div>
+                    <div class="team-score">
+                        <div class="team-name" id="bowlingTeam">AUS</div>
+                        <div class="score-main" id="target">Target: -</div>
+                        <div class="score-detail" id="rrr">RRR: -</div>
+                    </div>
+                </div>
+
+                <div class="match-info" id="matchInfo">T20 World Cup 2026 - Group Stage</div>
+
+                <div class="wagon-wheel" id="wagonWheel"></div>
+
+                <div class="controls-area">
+                    <div class="shot-timer" id="timerContainer" style="display: none;">
+                        <div class="timer-bar" id="timerBar"></div>
+                    </div>
+                    <div class="shot-buttons" id="shotButtons" style="display: none;">
+                        <button class="shot-btn" data-icon="🏏" onclick="playShot('defense')">Defense</button>
+                        <button class="shot-btn" data-icon="➡️" onclick="playShot('cover')">Cover Drive</button>
+                        <button class="shot-btn" data-icon="⬅️" onclick="playShot('pull')">Pull Shot</button>
+                        <button class="shot-btn" data-icon="⬆️" onclick="playShot('straight')">Straight</button>
+                        <button class="shot-btn" data-icon="🔄" onclick="playShot('sweep')">Sweep</button>
+                        <button class="shot-btn" data-icon="🚀" onclick="playShot('six')">Lofted Six</button>
+                    </div>
+                    <button id="bowlBtn" class="play-now-btn" style="width: 200px; height: 60px; font-size: 18px; margin: 0 auto; display: block;" onclick="bowlBall()">BOWL</button>
+                </div>
+            </div>
+
+            <div class="commentary-box" id="commentary" style="display: none;">Welcome to Sams World!</div>
+        </div>
+
+        <!-- DRS Overlay -->
+        <div id="drsOverlay" class="drs-overlay">
+            <div class="drs-screen">
+                <div class="drs-text">Third Umpire Review</div>
+                <div style="font-size: 60px; margin: 20px;">📺</div>
+                <div class="drs-decision" id="drsDecision">Reviewing...</div>
+            </div>
+        </div>
+
+        <!-- Trophy Ceremony -->
+        <div id="trophyCeremony" class="trophy-ceremony">
+            <div class="trophy">🏆</div>
+            <div class="ceremony-text">WORLD CHAMPION!</div>
+            <div style="font-size: 18px; color: rgba(255,255,255,0.8); margin-top: 10px;">You have conquered Sams World!</div>
+            <button class="play-now-btn" style="margin-top: 40px; width: 250px;" onclick="showMainMenu()">Continue</button>
+        </div>
+    </div>
+
+    <script>
+        // Game State
+        const gameState = {
+            coins: 5000,
+            gems: 50,
+            currentScreen: 'loading',
+            match: {
+                battingTeam: 'IND',
+                bowlingTeam: 'AUS',
+                runs: 0,
+                wickets: 0,
+                overs: 0,
+                balls: 0,
+                target: null,
+                maxOvers: 20,
+                isBatting: true,
+                ballInPlay: false,
+                shotTiming: null,
+                wagonWheel: []
+            },
+            career: {
+                currentStage: 2,
+                stages: ['street', 'domestic', 'national', 'worldcup', 'captain', 'champion']
+            }
+        };
+
+        // Commentary Lines
+        const commentary = {
+            welcome: ["Welcome to Sams World!", "The crowd is electric tonight!", "World Cup fever is here!"],
+            bowling: ["The bowler is running in...", "Good pace on that delivery!", "Smart variation!"],
+            shot: {
+                perfect: ["Absolutely glorious!", "Shot of the tournament!", "Take a bow!", "Into the stands!"],
+                good: ["Well played!", "Good timing!", "Found the gap!", "Nicely played!"],
+                miss: ["Oh that's close!", "Beaten all ends up!", "Good delivery!", "No run there."],
+                wicket: ["Bowled him!", "Caught behind!", "What a delivery!", "Plumb in front!"]
+            },
+            six: ["SIX! Maximum!", "Over the ropes!", "Into the crowd!", "That's huge!"],
+            four: ["FOUR! Boundary!", "Racing to the fence!", "Sweetly timed!", "Four runs!"]
+        };
+
+        // Loading Sequence
+        window.onload = function() {
+            let progress = 0;
+            const loadingInterval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(loadingInterval);
+                    setTimeout(() => {
+                        showMainMenu();
+                    }, 500);
+                }
+                document.getElementById('loadingProgress').style.width = progress + '%';
+            }, 200);
+        };
+
+        // Screen Management
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            gameState.currentScreen = screenId;
+        }
+
+        function showMainMenu() {
+            showScreen('mainMenu');
+            document.getElementById('coins').textContent = gameState.coins;
+            document.getElementById('gems').textContent = gameState.gems;
+        }
+
+        function showModeSelect() {
+            document.getElementById('modeSelectModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
+        }
+
+        function showCareerMode() {
+            showScreen('careerScreen');
+        }
+
+        function showWorldCup() {
+            startQuickMatch(20);
+        }
+
+        function showMultiplayer() {
+            showCommentary("Multiplayer coming in World Cup update!");
+            setTimeout(() => startQuickMatch(5), 1500);
+        }
+
+        function showPractice() {
+            startQuickMatch(2);
+        }
+
+        // Match Setup
+        function startQuickMatch(overs) {
+            closeModal();
+            gameState.match = {
+                battingTeam: 'IND',
+                bowlingTeam: 'AUS',
+                runs: 0,
+                wickets: 0,
+                overs: 0,
+                balls: 0,
+                target: null,
+                maxOvers: overs,
+                isBatting: true,
+                ballInPlay: false,
+                shotTiming: null,
+                wagonWheel: []
+            };
+
+            updateScoreboard();
+            showScreen('gameScreen');
+            showCommentary(randomChoice(commentary.welcome));
+
+            document.getElementById('bowlBtn').style.display = 'block';
+            document.getElementById('shotButtons').style.display = 'none';
+            document.getElementById('timerContainer').style.display = 'none';
+        }
+
+        // Bowling Mechanics
+        function bowlBall() {
+            if (gameState.match.ballInPlay) return;
+
+            gameState.match.ballInPlay = true;
+            document.getElementById('bowlBtn').style.display = 'none';
+
+            // Bowler animation
+            const bowler = document.getElementById('bowler');
+            bowler.classList.add('running');
+
+            showCommentary(randomChoice(commentary.bowling));
+
+            setTimeout(() => {
+                bowler.classList.remove('running');
+
+                // Ball delivery
+                const ball = document.getElementById('ball');
+                ball.classList.add('bowled');
+
+                // Start timing window
+                startShotTiming();
+
+            }, 2000);
+        }
+
+        // Shot Timing System
+        function startShotTiming() {
+            const timerBar = document.getElementById('timerBar');
+            const timerContainer = document.getElementById('timerContainer');
+            const shotButtons = document.getElementById('shotButtons');
+
+            timerContainer.style.display = 'block';
+            shotButtons.style.display = 'grid';
+
+            let timeLeft = 100;
+            gameState.match.shotTiming = 'good';
+
+            const timer = setInterval(() => {
+                timeLeft -= 2;
+                timerBar.style.width = timeLeft + '%';
+
+                // Timing zones
+                if (timeLeft > 70) {
+                    gameState.match.shotTiming = 'early';
+                    timerBar.style.background = 'linear-gradient(90deg, #ff006e, #ff8c00)';
+                } else if (timeLeft > 30) {
+                    gameState.match.shotTiming = 'perfect';
+                    timerBar.style.background = 'linear-gradient(90deg, #00ff88, #ffd700)';
+                } else {
+                    gameState.match.shotTiming = 'late';
+                    timerBar.style.background = 'linear-gradient(90deg, #ff8c00, #ff006e)';
+                }
+
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    if (gameState.match.ballInPlay) {
+                        missBall();
+                    }
+                }
+            }, 20);
+
+            // Store timer to clear it if shot played
+            gameState.match.timerInterval = timer;
+        }
+
+        // Shot Playing
+        function playShot(shotType) {
+            if (!gameState.match.ballInPlay) return;
+
+            clearInterval(gameState.match.timerInterval);
+
+            const timing = gameState.match.shotTiming;
+            const batsman = document.getElementById('batsman');
+            const ball = document.getElementById('ball');
+
+            batsman.classList.add('swinging');
+
+            // Calculate outcome based on timing and shot
+            let outcome = calculateOutcome(shotType, timing);
+
+            setTimeout(() => {
+                batsman.classList.remove('swinging');
+                ball.classList.remove('bowled');
+
+                if (outcome.runs > 0) {
+                    ball.classList.add('hit');
+                    ball.style.setProperty('--hit-direction', outcome.direction + '%');
+                }
+
+                handleOutcome(outcome);
+
+            }, 400);
+        }
+
+        function calculateOutcome(shot, timing) {
+            const outcomes = {
+                defense: { runs: 0, wicket: 0.05 },
+                cover: { runs: timing === 'perfect' ? 4 : timing === 'good' ? 2 : 0, wicket: 0.1 },
+                pull: { runs: timing === 'perfect' ? 6 : timing === 'good' ? 4 : 1, wicket: 0.15 },
+                straight: { runs: timing === 'perfect' ? 6 : timing === 'good' ? 4 : 2, wicket: 0.1 },
+                sweep: { runs: timing === 'perfect' ? 4 : timing === 'good' ? 2 : 0, wicket: 0.2 },
+                six: { runs: timing === 'perfect' ? 6 : timing === 'good' ? 4 : 0, wicket: 0.3 }
+            };
+
+            const base = outcomes[shot];
+            const rand = Math.random();
+
+            // Check for wicket
+            if (rand < base.wicket && timing !== 'perfect') {
+                return { type: 'wicket', runs: 0 };
+            }
+
+            // Determine direction based on shot
+            const directions = {
+                defense: 50, cover: 75, pull: 25, straight: 50, sweep: 30, six: 60
+            };
+
+            return { 
+                type: base.runs === 6 ? 'six' : base.runs === 4 ? 'four' : 'runs', 
+                runs: base.runs,
+                direction: directions[shot],
+                timing: timing
+            };
+        }
+
+        function handleOutcome(outcome) {
+            const ball = document.getElementById('ball');
+
+            if (outcome.type === 'wicket') {
+                handleWicket();
+            } else {
+                // Add runs
+                gameState.match.runs += outcome.runs;
+
+                // Commentary
+                let text = '';
+                if (outcome.type === 'six') {
+                    text = randomChoice(commentary.six);
+                    showSixEffect();
+                    createFireworks();
+                } else if (outcome.type === 'four') {
+                    text = randomChoice(commentary.four);
+                } else {
+                    const quality = outcome.timing === 'perfect' ? 'perfect' : outcome.timing === 'good' ? 'good' : 'miss';
+                    text = randomChoice(commentary.shot[quality]);
+                }
+
+                showCommentary(text + (outcome.runs > 0 ? ` ${outcome.runs} runs!` : ''));
+
+                // Update wagon wheel
+                gameState.match.wagonWheel.push({ runs: outcome.runs, angle: outcome.direction });
+            }
+
+            // Update ball count
+            gameState.match.balls++;
+            if (gameState.match.balls >= 6) {
+                gameState.match.balls = 0;
+                gameState.match.overs++;
+            }
+
+            updateScoreboard();
+
+            // Reset for next ball
+            setTimeout(() => {
+                ball.classList.remove('hit');
+                ball.style.display = 'none';
+                gameState.match.ballInPlay = false;
+
+                document.getElementById('shotButtons').style.display = 'none';
+                document.getElementById('timerContainer').style.display = 'none';
+                document.getElementById('bowlBtn').style.display = 'block';
+
+                // Check match end
+                checkMatchEnd();
+            }, 1500);
+        }
+
+        function missBall() {
+            showCommentary("No shot offered - Dot ball!");
+            gameState.match.balls++;
+            if (gameState.match.balls >= 6) {
+                gameState.match.balls = 0;
+                gameState.match.overs++;
+            }
+            updateScoreboard();
+
+            setTimeout(() => {
+                gameState.match.ballInPlay = false;
+                document.getElementById('shotButtons').style.display = 'none';
+                document.getElementById('timerContainer').style.display = 'none';
+                document.getElementById('bowlBtn').style.display = 'block';
+                checkMatchEnd();
+            }, 1000);
+        }
+
+        function handleWicket() {
+            gameState.match.wickets++;
+            showCommentary(randomChoice(commentary.shot.wicket) + " WICKET!");
+
+            // DRS Animation chance
+            if (Math.random() > 0.7) {
+                showDRS();
+            }
+
+            if (gameState.match.wickets >= 10) {
+                setTimeout(() => {
+                    endMatch();
+                }, 2000);
+            }
+        }
+
+        function showDRS() {
+            const drs = document.getElementById('drsOverlay');
+            const decision = document.getElementById('drsDecision');
+
+            drs.classList.add('active');
+            decision.textContent = 'Reviewing...';
+            decision.className = 'drs-decision';
+
+            setTimeout(() => {
+                const isOut = Math.random() > 0.3;
+                decision.textContent = isOut ? 'OUT!' : 'NOT OUT!';
+                decision.classList.add(isOut ? 'out' : 'not-out');
+
+                setTimeout(() => {
+                    drs.classList.remove('active');
+                }, 2000);
+            }, 2000);
+        }
+
+        function showSixEffect() {
+            const effect = document.createElement('div');
+            effect.className = 'six-effect';
+            effect.textContent = '6️⃣ SIX!';
+            document.getElementById('gameScreen').appendChild(effect);
+
+            setTimeout(() => effect.remove(), 2000);
+        }
+
+        function createFireworks() {
+            const container = document.getElementById('gameScreen');
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    const fw = document.createElement('div');
+                    fw.className = 'firework';
+                    fw.style.left = Math.random() * 100 + '%';
+                    fw.style.top = Math.random() * 50 + '%';
+                    fw.style.background = ['#ffd700', '#ff006e', '#00d4ff', '#00ff88'][Math.floor(Math.random() * 4)];
+                    fw.style.setProperty('--tx', (Math.random() - 0.5) * 200 + 'px');
+                    fw.style.setProperty('--ty', (Math.random() - 0.5) * 200 + 'px');
+                    container.appendChild(fw);
+                    setTimeout(() => fw.remove(), 1000);
+                }, i * 50);
+            }
+        }
+
+        function updateScoreboard() {
+            document.getElementById('runs').textContent = gameState.match.runs;
+            document.getElementById('wickets').textContent = gameState.match.wickets;
+            document.getElementById('overs').textContent = 
+                `${gameState.match.overs}.${gameState.match.balls} overs`;
+
+            if (gameState.match.target) {
+                const needed = gameState.match.target - gameState.match.runs;
+                const ballsLeft = (gameState.match.maxOvers * 6) - (gameState.match.overs * 6 + gameState.match.balls);
+                const rrr = ballsLeft > 0 ? ((needed / ballsLeft) * 6).toFixed(1) : '-';
+                document.getElementById('rrr').textContent = `Need ${needed} from ${ballsLeft} balls`;
+            }
+        }
+
+        function checkMatchEnd() {
+            const totalBalls = gameState.match.overs * 6 + gameState.match.balls;
+            const maxBalls = gameState.match.maxOvers * 6;
+
+            if (totalBalls >= maxBalls || gameState.match.wickets >= 10) {
+                endMatch();
+            }
+        }
+
+        function endMatch() {
+            if (gameState.match.runs > 150) {
+                showTrophyCeremony();
+            } else {
+                showCommentary(`Match Over! Total: ${gameState.match.runs}/${gameState.match.wickets}`);
+                setTimeout(() => showMainMenu(), 3000);
+            }
+        }
+
+        function showTrophyCeremony() {
+            const ceremony = document.getElementById('trophyCeremony');
+            ceremony.classList.add('active');
+
+            // Create confetti
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const conf = document.createElement('div');
+                    conf.className = 'confetti';
+                    conf.style.left = Math.random() * 100 + '%';
+                    conf.style.background = ['#ffd700', '#ff006e', '#00d4ff'][Math.floor(Math.random() * 3)];
+                    conf.style.animationDelay = Math.random() * 2 + 's';
+                    ceremony.appendChild(conf);
+                }, i * 100);
+            }
+
+            // Reward coins
+            gameState.coins += 1000;
+        }
+
+        function showCommentary(text) {
+            const box = document.getElementById('commentary');
+            box.textContent = text;
+            box.style.display = 'block';
+
+            // Reset animation
+            box.style.animation = 'none';
+            setTimeout(() => box.style.animation = 'commentarySlide 0.3s ease-out', 10);
+
+            setTimeout(() => {
+                box.style.display = 'none';
+            }, 3000);
+        }
+
+        function randomChoice(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        // Prevent zoom on mobile
+        document.addEventListener('gesturestart', function(e) {
+            e.preventDefault();
+        });
+
+        // Touch optimization
+        document.addEventListener('touchmove', function(e) {
+            if (e.scale !== 1) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+    </script>
+</body>
+</html>
